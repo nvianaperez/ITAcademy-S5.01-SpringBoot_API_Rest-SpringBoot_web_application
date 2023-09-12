@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="template :: head"></head>
+
+<body>
+    <header th:replace="template :: header"></header>
+    <div class="container mt-3 mb-3">
+        <h1 th:text="${title}"></h1>
+    </div>
+    <div class="container mt-3 w-75">
+
+        <a class="btn btn-primary btn-sm" th:href="@{./addBranch}" th:text="'New Branch'" title="Create new branch" />
+
+        <table class="table mt-2">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Country</th>
+                    <th scope="col">Area</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr th:each="bb:${branchesList}">
+                    <td th:text="${bb.pk_branchId}"></td>
+                    <td th:text="${bb.name}"></td>
+                    <td th:text="${bb.country}"></td>
+                    <td th:text="${bb.type}"></td>
+                    <td>
+                        <a class="btn btn-info btn-sm" th:href="@{/bankbranches/showOne/{id}(id=${bb.pk_branchId})}" th:text="'Show'" title="Show the branch" style="--bs-btn-font-size: .75rem;" />
+                        <a class="btn btn-secondary btn-sm" th:href="@{/bankbranches/update/{id}(id=${bb.pk_branchId})}" th:text="'Update'" title="Update the branch" style="--bs-btn-font-size: .75rem;" />
+                        <a class="btn btn-warning btn-sm" th:href="@{/bankbranches/delete/{id}(id=${bb.pk_branchId})}" th:text="'Delete'" title="Delete the branch" style="--bs-btn-font-size: .75rem;" onclick="return confirm('Are you sure deleting this branch?')" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <div class="container mt-5 w-75">
+        <div class="d-flex justify-content-center">
+            <a class="btn btn-primary btn-sm m-2" th:href="@{/bankbranches/}" th:text="'All Branches'" title="Show all branches" />
+            <a class="btn btn-primary btn-sm m-2" th:href="@{/bankbranches/filterEU}" th:text="'EU Branches'" title="Filter by EU branches" />
+            <a class="btn btn-primary btn-sm m-2" th:href="@{/bankbranches/filterNOTEU}" th:text="'NOT EU Branches'" title="Filter by NOT EU branches" />
+        </div>
+    </div>
+
+
+    <div class="mt-3 alert alert-warning" role="alert" th:if="${branchesList == null or branchesList.isEmpty()}">
+        There aren't branches available.
+    </div>
+
+    <footer th:replace="template :: footer"></footer>
+</body>
+</html>
