@@ -7,15 +7,23 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="S05T01N03VianaPerezNuria" />
         <module name="S05T01N01VianaPerezNuria" />
         <module name="S05T01N02VianaPerezNuria" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="S05T01N03VianaPerezNuria (1)" target="17" />
+      <module name="S05T01N03VianaPerezNuria (2)" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="S05T01N01VianaPerezNuria" options="-parameters" />
       <module name="S05T01N02VianaPerezNuria" options="-parameters" />
+      <module name="S05T01N03VianaPerezNuria" options="-parameters" />
+      <module name="S05T01N03VianaPerezNuria (1)" options="-parameters" />
+      <module name="S05T01N03VianaPerezNuria (2)" options="-parameters" />
     </option>
   </component>
 </project>

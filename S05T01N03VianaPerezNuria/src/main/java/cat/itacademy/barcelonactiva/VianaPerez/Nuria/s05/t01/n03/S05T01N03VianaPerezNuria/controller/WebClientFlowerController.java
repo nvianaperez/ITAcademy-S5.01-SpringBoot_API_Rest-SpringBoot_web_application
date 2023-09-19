@@ -1,8 +1,7 @@
-package cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n02.S05T01N02VianaPerezNuria.controller;
+package cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n03.S05T01N03VianaPerezNuria.controller;
 
-import cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n02.S05T01N02VianaPerezNuria.model.dto.FlowerDTO;
-import cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n02.S05T01N02VianaPerezNuria.model.dto.FlowerDTOSchema;
-import cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n02.S05T01N02VianaPerezNuria.model.service.IFlowerService;
+import cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n03.S05T01N03VianaPerezNuria.model.dto.FlowerDTO;
+import cat.itacademy.barcelonactiva.VianaPerez.Nuria.s05.t01.n03.S05T01N03VianaPerezNuria.model.service.IWebClientFlowerService;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,26 +17,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
-@RequestMapping("/flowers")
-public class FlowerController {
+@RequestMapping("/webClientFlowers")
+public class WebClientFlowerController {
+
     @Autowired
-    private IFlowerService flowerService;
+    private final IWebClientFlowerService webClientFlowerService;
 
+    public WebClientFlowerController(IWebClientFlowerService webClientFlowerService) {
+        super();
+        this.webClientFlowerService = webClientFlowerService;
+    }
 
-    //http://localhost:9001/flowers/add
+    //http://localhost:9002/webClientFlowers/add
     @PostMapping("/add")
     @Operation(
-            tags = {"Sprint 5.1.2"},
-            operationId = "addFlower",
+            tags = {"Sprint 5.1.3"},
+            operationId = "addFlower by WebClient",
             summary = "Create a new flower and save in database",
             description = "needs a FlowerDTO in json format, check if flower is present by name and make sure that name and country attributes are not empty. Finally, the expected responses are 201,400 and 500",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "FlowerDTO constructor needs only name and country attributes",
-            content = @Content(schema = @Schema(implementation = FlowerDTOSchema.class))),
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "FlowerDTO constructor needs only name and country attributes"),
 //            requestBody has its own annotation, the others (like "pathVariable", "cookieValue", "requestHeader" or "requestParam")  go inside parameters annotation
 //            parameters = {@Parameter(name = "name of the variable", description = "The path variable", example = "21", in = ParameterIn.PATH)},
 //            hidden = true,
@@ -53,16 +56,16 @@ public class FlowerController {
                     schema = @Schema(implementation = FlowerDTO.class), examples = {@ExampleObject(name = "example", value = "null")})})
     })
 
-    public ResponseEntity<FlowerDTO> addFlower(@Valid @RequestBody FlowerDTO flowerDTO) {
-        FlowerDTO flowerSaved = flowerService.createFlower(flowerDTO);
+    public ResponseEntity<Mono<FlowerDTO>> addFlower(@Valid @RequestBody FlowerDTO flowerDTO) {
+        Mono<FlowerDTO> flowerSaved = webClientFlowerService.createFlower(flowerDTO);
         if (flowerSaved != null) return new ResponseEntity<>(flowerSaved, HttpStatus.CREATED);
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    //http://localhost:9001/flowers/update
+    //http://localhost:9002/webClientFlowers/update
     @PutMapping("/update")
     @Operation(
-            tags = {"Sprint 5.1.2"},
+            tags = {"Sprint 5.1.3"},
             operationId = "updateFlower",
             summary = "Update a flower and save changes in database",
             description = "needs a FlowerDTO in json format, check if flower is present by id and make sure that name and country NEW attributes are not empty. Finally, the expected responses are 200,400 and 404",
@@ -82,17 +85,16 @@ public class FlowerController {
             @ApiResponse(responseCode = "404", description = "Flower id is not found", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = FlowerDTO.class), examples = {@ExampleObject(name = "example", value = "null")})})
     })
-    public ResponseEntity<FlowerDTO> updateFlower(@Valid @RequestBody FlowerDTO flowerDTO) {
-        FlowerDTO flowerUpdated = flowerService.updateFlower(flowerDTO);
+    public ResponseEntity<Mono<FlowerDTO>> updateFlower(@Valid @RequestBody FlowerDTO flowerDTO) {
+        Mono<FlowerDTO> flowerUpdated = webClientFlowerService.updateFlower(flowerDTO);
         if(flowerUpdated == null)  return ResponseEntity.status(404).body(null);
-        if(flowerUpdated.getName().isEmpty() || flowerUpdated.getCountry().isEmpty()) return ResponseEntity.status(400).body(null);
         return ResponseEntity.status(200).body(flowerUpdated);
     }
 
-    //http://localhost:9001/flowers/delete/{id}
+    //http://localhost:9002/webClientFlowers/delete/{id}
     @DeleteMapping("/delete/{id}")
     @Operation(
-            tags = {"Sprint 5.1.2"},
+            tags = {"Sprint 5.1.3"},
             operationId = "deleteFlower",
             summary = "Delete a flower and save changes in database",
             description = "needs the variable id in the path, check if flower is present by id and delete the flower in database. Finally, the expected responses are 200 and 404",
@@ -106,15 +108,17 @@ public class FlowerController {
             @ApiResponse(responseCode = "404", description = "Flower id is not found", content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = FlowerDTO.class), examples = {@ExampleObject(name = "example", value = "null")})})
     })
-    public ResponseEntity<FlowerDTO> deleteFlower(@Valid @PathVariable Long id) {
-        if (flowerService.deleteFlower(id)) return ResponseEntity.status(200).body(null);
-        return ResponseEntity.status(404).body(null);
+    public ResponseEntity<Mono<FlowerDTO>> deleteFlower(@Valid @PathVariable Long id) {
+        Mono<FlowerDTO> flowerDeleted = webClientFlowerService.deleteFlower(id);
+        if(flowerDeleted == null)  return ResponseEntity.status(404).body(null);
+        return ResponseEntity.status(200).body(flowerDeleted);
+
     }
 
-    //http://localhost:9001/flowers/getOne/{id}
+    //http://localhost:9002/webClientFlowers/getOne/{id}
     @GetMapping("/getOne/{id}")
     @Operation(
-            tags = {"Sprint 5.1.2"},
+            tags = {"Sprint 5.1.3"},
             operationId = "getOneFlower",
             summary = "Find a flower by id in database.",
             description = "needs the variable id in the path, find a flower by id in database and return his FlowerDTO if is present, or null if is not present. Finally, the expected responses are 200 and 404",
@@ -129,15 +133,16 @@ public class FlowerController {
                     schema = @Schema(implementation = FlowerDTO.class), examples = {@ExampleObject(name = "example", value = "null")})})
     })
 
-    public ResponseEntity<FlowerDTO> getOneFlower(@Valid @PathVariable Long id) {
-        if (flowerService.getOneFlowerById(id) != null) return ResponseEntity.status(200).body(flowerService.getOneFlowerById(id));
+    public ResponseEntity<Mono<FlowerDTO>> getOneFlower(@Valid @PathVariable Long id) {
+        Mono<FlowerDTO> flowerSelected = webClientFlowerService.getOneFlowerById(id);
+        if (flowerSelected != null) return ResponseEntity.status(200).body(flowerSelected);
         return ResponseEntity.status(404).body(null);
     }
 
-    //http://localhost:9001/flowers/getAll
+    //http://localhost:9002/webClientFlowers/getAll
     @GetMapping("/getAll")
     @Operation(
-            tags = {"Sprint 5.1.2"},
+            tags = {"Sprint 5.1.3"},
             operationId = "getAllFlowers",
             summary = "Find list of flowers.",
             description = "return all instances of entity Flower. Finally, the expected responses are 200 and 404",
@@ -151,21 +156,13 @@ public class FlowerController {
                     schema = @Schema(implementation = FlowerDTO.class), examples = {@ExampleObject(name = "example", value = "null")})})
     })
 
-    public ResponseEntity<List<FlowerDTO>> getAllFlowers() {
-        if (flowerService.getAllFlowers() != null) return ResponseEntity.status(200).body(flowerService.getAllFlowers());
+    public ResponseEntity<Flux<FlowerDTO>> getAllFlowers() {
+        if (webClientFlowerService.getAllFlowers() != null) return ResponseEntity.status(200).body(webClientFlowerService.getAllFlowers());
         return ResponseEntity.status(404).body(null);
     }
 
 
 
 }
-
-
-
-
-
-
-
-
 
 
